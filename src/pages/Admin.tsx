@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useForm } from 'react-hook-form';
 import { 
   Users, 
   FileText, 
@@ -17,7 +18,9 @@ import {
   Filter,
   Calendar,
   Heart,
-  TrendingUp
+  TrendingUp,
+  Save,
+  X
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -61,6 +64,31 @@ interface Category {
   created_at: string;
 }
 
+interface PoemFormData {
+  title: string;
+  content: string;
+  excerpt: string;
+  author_name: string;
+  author_bio: string;
+  category_id: string;
+  tags: string;
+  featured: boolean;
+  published: boolean;
+}
+
+interface BlogPostFormData {
+  title: string;
+  content: string;
+  excerpt: string;
+  author_name: string;
+  author_bio: string;
+  category_id: string;
+  tags: string;
+  reading_time: number;
+  featured: boolean;
+  published: boolean;
+}
+
 const Admin: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'poems' | 'blog' | 'users' | 'categories'>('dashboard');
@@ -72,6 +100,12 @@ const Admin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
+  const [showCreatePoem, setShowCreatePoem] = useState(false);
+  const [showCreateBlogPost, setShowCreateBlogPost] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const poemForm = useForm<PoemFormData>();
+  const blogPostForm = useForm<BlogPostFormData>();
 
   // Check if user is admin
   if (!user?.is_admin) {
@@ -210,6 +244,73 @@ const Admin: React.FC = () => {
       setCategories(data || []);
     } catch (error) {
       console.error('Error loading categories:', error);
+    }
+  };
+
+  const createPoem = async (data: PoemFormData) => {
+    setSubmitting(true);
+    try {
+      const tagsArray = data.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      
+      const { error } = await supabase
+        .from('poems')
+        .insert({
+          title: data.title,
+          content: data.content,
+          excerpt: data.excerpt,
+          author_name: data.author_name,
+          author_bio: data.author_bio,
+          category_id: data.category_id || null,
+          tags: tagsArray,
+          featured: data.featured,
+          published: data.published,
+          user_id: user.id
+        });
+
+      if (error) throw error;
+
+      poemForm.reset();
+      setShowCreatePoem(false);
+      await loadPoems();
+      await loadStats();
+    } catch (error) {
+      console.error('Error creating poem:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const createBlogPost = async (data: BlogPostFormData) => {
+    setSubmitting(true);
+    try {
+      const tagsArray = data.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      
+      const { error } = await supabase
+        .from('blog_posts')
+        .insert({
+          title: data.title,
+          content: data.content,
+          excerpt: data.excerpt,
+          author_name: data.author_name,
+          author_bio: data.author_bio,
+          category_id: data.category_id || null,
+          tags: tagsArray,
+          reading_time: data.reading_time,
+          featured: data.featured,
+          published: data.published,
+          user_id: user.id
+        });
+
+      if (error) throw error;
+
+      blogPostForm.reset();
+      setShowCreateBlogPost(false);
+      await loadBlogPosts();
+      await loadStats();
+    } catch (error) {
+      console.error('Error creating blog post:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -626,7 +727,162 @@ const Admin: React.FC = () => {
                   <option value="draft">Draft</option>
                 </select>
               </div>
+              <button
+                onClick={() => setShowCreatePoem(true)}
+                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium flex items-center"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Poem
+              </button>
             </div>
+
+            {/* Create Poem Form */}
+            {showCreatePoem && (
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-slate-900">Create New Poem</h3>
+                  <button
+                    onClick={() => setShowCreatePoem(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                
+                <form onSubmit={poemForm.handleSubmit(createPoem)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Title *
+                      </label>
+                      <input
+                        {...poemForm.register('title', { required: 'Title is required' })}
+                        type="text"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Enter poem title"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Author Name *
+                      </label>
+                      <input
+                        {...poemForm.register('author_name', { required: 'Author name is required' })}
+                        type="text"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Enter author name"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Content *
+                    </label>
+                    <textarea
+                      {...poemForm.register('content', { required: 'Content is required' })}
+                      rows={8}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Enter the poem content..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Excerpt
+                    </label>
+                    <textarea
+                      {...poemForm.register('excerpt')}
+                      rows={2}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Brief excerpt or preview..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Category
+                      </label>
+                      <select
+                        {...poemForm.register('category_id')}
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map(category => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Tags (comma-separated)
+                      </label>
+                      <input
+                        {...poemForm.register('tags')}
+                        type="text"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="love, nature, hope"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Author Bio
+                    </label>
+                    <textarea
+                      {...poemForm.register('author_bio')}
+                      rows={2}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Brief author biography..."
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-6">
+                    <label className="flex items-center">
+                      <input
+                        {...poemForm.register('published')}
+                        type="checkbox"
+                        className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="ml-2 text-sm text-slate-700">Published</span>
+                    </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        {...poemForm.register('featured')}
+                        type="checkbox"
+                        className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="ml-2 text-sm text-slate-700">Featured</span>
+                    </label>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreatePoem(false)}
+                      className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {submitting ? 'Creating...' : 'Create Poem'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
 
             <ContentTable
               content={filterContent(poems)}
@@ -663,7 +919,180 @@ const Admin: React.FC = () => {
                   <option value="draft">Draft</option>
                 </select>
               </div>
+              <button
+                onClick={() => setShowCreateBlogPost(true)}
+                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium flex items-center"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Blog Post
+              </button>
             </div>
+
+            {/* Create Blog Post Form */}
+            {showCreateBlogPost && (
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-slate-900">Create New Blog Post</h3>
+                  <button
+                    onClick={() => setShowCreateBlogPost(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                
+                <form onSubmit={blogPostForm.handleSubmit(createBlogPost)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Title *
+                      </label>
+                      <input
+                        {...blogPostForm.register('title', { required: 'Title is required' })}
+                        type="text"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Enter blog post title"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Author Name *
+                      </label>
+                      <input
+                        {...blogPostForm.register('author_name', { required: 'Author name is required' })}
+                        type="text"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Enter author name"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Content *
+                    </label>
+                    <textarea
+                      {...blogPostForm.register('content', { required: 'Content is required' })}
+                      rows={10}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Enter the blog post content (supports Markdown)..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Excerpt *
+                    </label>
+                    <textarea
+                      {...blogPostForm.register('excerpt', { required: 'Excerpt is required' })}
+                      rows={3}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Brief excerpt or summary..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Category
+                      </label>
+                      <select
+                        {...blogPostForm.register('category_id')}
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map(category => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Reading Time (minutes)
+                      </label>
+                      <input
+                        {...blogPostForm.register('reading_time', { 
+                          valueAsNumber: true,
+                          min: 1,
+                          max: 60
+                        })}
+                        type="number"
+                        min="1"
+                        max="60"
+                        defaultValue={5}
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Tags (comma-separated)
+                      </label>
+                      <input
+                        {...blogPostForm.register('tags')}
+                        type="text"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="writing, poetry, craft"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Author Bio
+                    </label>
+                    <textarea
+                      {...blogPostForm.register('author_bio')}
+                      rows={2}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Brief author biography..."
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-6">
+                    <label className="flex items-center">
+                      <input
+                        {...blogPostForm.register('published')}
+                        type="checkbox"
+                        className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="ml-2 text-sm text-slate-700">Published</span>
+                    </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        {...blogPostForm.register('featured')}
+                        type="checkbox"
+                        className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="ml-2 text-sm text-slate-700">Featured</span>
+                    </label>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateBlogPost(false)}
+                      className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {submitting ? 'Creating...' : 'Create Blog Post'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
 
             <ContentTable
               content={filterContent(blogPosts)}
