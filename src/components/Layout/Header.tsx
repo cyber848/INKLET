@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, Settings, PenTool } from 'lucide-react';
+import { Menu, X, User, LogOut, Settings, PenTool, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Header: React.FC = () => {
@@ -19,32 +19,38 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-700/50 sticky top-0 z-50">
+    <header className="bg-white/80 backdrop-blur-md border-b border-white/20 sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <PenTool className="h-8 w-8 text-gold-400" />
-            <span className="text-2xl font-serif font-semibold text-white">Inklet</span>
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <PenTool className="h-8 w-8 text-primary-600 group-hover:text-secondary-600 transition-colors duration-300" />
+              <Sparkles className="h-4 w-4 text-gold-400 absolute -top-1 -right-1 animate-pulse" />
+            </div>
+            <span className="text-2xl font-serif font-bold text-gradient group-hover:scale-105 transition-transform duration-300">
+              Inklet
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-slate-300 hover:text-white transition-colors duration-200">
-              Home
-            </Link>
-            <Link to="/poems" className="text-slate-300 hover:text-white transition-colors duration-200">
-              Poems
-            </Link>
-            <Link to="/blog" className="text-slate-300 hover:text-white transition-colors duration-200">
-              Blog
-            </Link>
-            <Link to="/about" className="text-slate-300 hover:text-white transition-colors duration-200">
-              About
-            </Link>
-            <Link to="/submit" className="text-slate-300 hover:text-white transition-colors duration-200">
-              Submit
-            </Link>
+            {[
+              { to: '/', label: 'Home' },
+              { to: '/poems', label: 'Poems' },
+              { to: '/blog', label: 'Blog' },
+              { to: '/about', label: 'About' },
+              { to: '/submit', label: 'Submit' },
+            ].map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className="relative text-slate-700 hover:text-primary-600 transition-colors duration-300 font-medium group"
+              >
+                {label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 group-hover:w-full transition-all duration-300"></span>
+              </Link>
+            ))}
           </nav>
 
           {/* User Menu */}
@@ -53,39 +59,43 @@ const Header: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors duration-200"
+                  className="flex items-center space-x-2 text-slate-700 hover:text-primary-600 transition-colors duration-300 bg-gradient-to-r from-primary-50 to-secondary-50 px-4 py-2 rounded-xl hover:shadow-lg"
                 >
-                  <User className="h-5 w-5" />
-                  <span className="text-sm">{user.full_name || user.email}</span>
+                  <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium">{user.full_name || user.email}</span>
                 </button>
                 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors duration-200"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <User className="inline h-4 w-4 mr-2" />
-                      Profile
-                    </Link>
-                    {user.is_admin && (
+                  <div className="absolute right-0 mt-2 w-48 card animate-slide-down z-50">
+                    <div className="py-2">
                       <Link
-                        to="/admin"
-                        className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors duration-200"
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 transition-all duration-200 rounded-lg mx-2"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        <Settings className="inline h-4 w-4 mr-2" />
-                        Admin Panel
+                        <User className="inline h-4 w-4 mr-2" />
+                        Profile
                       </Link>
-                    )}
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors duration-200"
-                    >
-                      <LogOut className="inline h-4 w-4 mr-2" />
-                      Sign Out
-                    </button>
+                      {user.is_admin && (
+                        <Link
+                          to="/admin"
+                          className="block px-4 py-2 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 transition-all duration-200 rounded-lg mx-2"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <Settings className="inline h-4 w-4 mr-2" />
+                          Admin Panel
+                        </Link>
+                      )}
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-200 rounded-lg mx-2"
+                      >
+                        <LogOut className="inline h-4 w-4 mr-2" />
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -93,13 +103,13 @@ const Header: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/auth"
-                  className="text-slate-300 hover:text-white transition-colors duration-200"
+                  className="text-slate-700 hover:text-primary-600 transition-colors duration-300 font-medium"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/auth?mode=signup"
-                  className="bg-gold-500 hover:bg-gold-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                  className="btn-primary"
                 >
                   Sign Up
                 </Link>
@@ -110,7 +120,7 @@ const Header: React.FC = () => {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-slate-300 hover:text-white"
+            className="md:hidden text-slate-700 hover:text-primary-600 p-2 rounded-lg hover:bg-primary-50 transition-all duration-300"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -119,52 +129,33 @@ const Header: React.FC = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-slate-800 border-t border-slate-700">
+        <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-white/20 animate-slide-down">
           <nav className="px-4 py-4 space-y-4">
-            <Link
-              to="/"
-              className="block text-slate-300 hover:text-white transition-colors duration-200"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/poems"
-              className="block text-slate-300 hover:text-white transition-colors duration-200"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Poems
-            </Link>
-            <Link
-              to="/blog"
-              className="block text-slate-300 hover:text-white transition-colors duration-200"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blog
-            </Link>
-            <Link
-              to="/about"
-              className="block text-slate-300 hover:text-white transition-colors duration-200"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/submit"
-              className="block text-slate-300 hover:text-white transition-colors duration-200"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Submit
-            </Link>
+            {[
+              { to: '/', label: 'Home' },
+              { to: '/poems', label: 'Poems' },
+              { to: '/blog', label: 'Blog' },
+              { to: '/about', label: 'About' },
+              { to: '/submit', label: 'Submit' },
+            ].map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className="block text-slate-700 hover:text-primary-600 transition-colors duration-300 font-medium py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {label}
+              </Link>
+            ))}
             
             {user ? (
-              <div className="pt-4 border-t border-slate-700 space-y-4">
-                <div className="text-sm text-slate-400">
+              <div className="pt-4 border-t border-slate-200 space-y-4">
+                <div className="text-sm text-slate-600 px-4">
                   {user.full_name || user.email}
                 </div>
                 <Link
                   to="/profile"
-                  className="block text-slate-300 hover:text-white transition-colors duration-200"
+                  className="block text-slate-700 hover:text-primary-600 transition-colors duration-300 font-medium py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Profile
@@ -172,7 +163,7 @@ const Header: React.FC = () => {
                 {user.is_admin && (
                   <Link
                     to="/admin"
-                    className="block text-slate-300 hover:text-white transition-colors duration-200"
+                    className="block text-slate-700 hover:text-primary-600 transition-colors duration-300 font-medium py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Admin Panel
@@ -180,23 +171,23 @@ const Header: React.FC = () => {
                 )}
                 <button
                   onClick={handleSignOut}
-                  className="block text-slate-300 hover:text-white transition-colors duration-200"
+                  className="block text-slate-700 hover:text-red-600 transition-colors duration-300 font-medium py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 w-full text-left"
                 >
                   Sign Out
                 </button>
               </div>
             ) : (
-              <div className="pt-4 border-t border-slate-700 space-y-4">
+              <div className="pt-4 border-t border-slate-200 space-y-4">
                 <Link
                   to="/auth"
-                  className="block text-slate-300 hover:text-white transition-colors duration-200"
+                  className="block text-slate-700 hover:text-primary-600 transition-colors duration-300 font-medium py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/auth?mode=signup"
-                  className="block bg-gold-500 hover:bg-gold-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-center"
+                  className="block btn-primary text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sign Up

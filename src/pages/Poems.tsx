@@ -1,10 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Heart, Eye, Calendar, Tag } from 'lucide-react';
+import { Search, Filter, Heart, Eye, Calendar, Tag, Star, BookOpen, Sparkles, TrendingUp } from 'lucide-react';
 
 const Poems: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+    
+    // Intersection Observer for scroll animations
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const elements = document.querySelectorAll('.animate-on-scroll');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   // Mock data - this would come from Supabase in a real implementation
   const poems = [
@@ -33,7 +55,8 @@ waiting to unfold.`,
       views: 187,
       featured: true,
       published: true,
-      created_at: "2024-01-15T08:00:00Z"
+      created_at: "2024-01-15T08:00:00Z",
+      gradient: "from-pink-400 to-rose-400"
     },
     {
       id: 2,
@@ -63,7 +86,8 @@ of tomorrow's rush.`,
       views: 142,
       featured: false,
       published: true,
-      created_at: "2024-01-10T14:30:00Z"
+      created_at: "2024-01-10T14:30:00Z",
+      gradient: "from-blue-400 to-cyan-400"
     },
     {
       id: 3,
@@ -94,7 +118,8 @@ in whispered names.`,
       views: 203,
       featured: true,
       published: true,
-      created_at: "2024-01-08T16:45:00Z"
+      created_at: "2024-01-08T16:45:00Z",
+      gradient: "from-purple-400 to-pink-400"
     },
     {
       id: 4,
@@ -127,18 +152,19 @@ of acceptance.`,
       views: 156,
       featured: false,
       published: true,
-      created_at: "2024-01-05T10:20:00Z"
+      created_at: "2024-01-05T10:20:00Z",
+      gradient: "from-green-400 to-emerald-400"
     }
   ];
 
   const categories = [
-    { value: 'all', label: 'All Categories' },
-    { value: 'nature', label: 'Nature' },
-    { value: 'urban', label: 'Urban' },
-    { value: 'memory', label: 'Memory' },
-    { value: 'philosophy', label: 'Philosophy' },
-    { value: 'love', label: 'Love' },
-    { value: 'social', label: 'Social' }
+    { value: 'all', label: 'All Categories', color: 'from-slate-400 to-slate-500' },
+    { value: 'nature', label: 'Nature', color: 'from-green-400 to-emerald-400' },
+    { value: 'urban', label: 'Urban', color: 'from-blue-400 to-cyan-400' },
+    { value: 'memory', label: 'Memory', color: 'from-purple-400 to-pink-400' },
+    { value: 'philosophy', label: 'Philosophy', color: 'from-orange-400 to-red-400' },
+    { value: 'love', label: 'Love', color: 'from-pink-400 to-rose-400' },
+    { value: 'social', label: 'Social', color: 'from-indigo-400 to-purple-400' }
   ];
 
   const filteredPoems = poems.filter(poem => {
@@ -159,161 +185,207 @@ of acceptance.`,
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+      {/* Floating Background Shapes */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="floating-shape floating-shape-1"></div>
+        <div className="floating-shape floating-shape-2"></div>
+        <div className="floating-shape floating-shape-3"></div>
+        <div className="floating-shape floating-shape-4"></div>
+      </div>
+
       {/* Header */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">
-            Poetry Collection
-          </h1>
-          <p className="text-lg text-slate-600 max-w-2xl">
-            Discover voices that speak to the soul, explore themes that resonate across time, 
-            and find words that capture the ineffable beauty of human experience.
-          </p>
+      <div className="relative bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600 overflow-hidden">
+        <div className="absolute inset-0 bg-floating-shapes opacity-20"></div>
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="text-center">
+            <div className="mb-6">
+              <BookOpen className="h-16 w-16 text-white mx-auto mb-4 animate-float" />
+            </div>
+            <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-6">
+              Poetry Collection
+            </h1>
+            <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+              Discover voices that speak to the soul, explore themes that resonate across time, 
+              and find words that capture the ineffable beauty of human experience.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Search and Filter */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search poems, authors, or themes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-          </div>
-          <div className="relative">
-            <Filter className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="pl-10 pr-10 rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white min-w-[200px]"
-            >
-              {categories.map(category => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </select>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        <div className={`card-gradient p-6 mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-4 h-5 w-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search poems, authors, or themes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-12 w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary-200 focus:border-primary-400 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+              />
+            </div>
+            
+            {/* Category Filter */}
+            <div className="relative">
+              <Filter className="absolute left-4 top-4 h-5 w-5 text-slate-400" />
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="pl-12 pr-10 rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary-200 focus:border-primary-400 appearance-none bg-white/80 backdrop-blur-sm min-w-[200px] transition-all duration-300"
+              >
+                {categories.map(category => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
+        {/* Category Pills */}
+        <div className="flex flex-wrap gap-3 mb-8 animate-on-scroll">
+          {categories.map(category => (
+            <button
+              key={category.value}
+              onClick={() => setSelectedCategory(category.value)}
+              className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 ${
+                selectedCategory === category.value
+                  ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
+                  : 'bg-white/80 text-slate-600 hover:bg-white border border-slate-200'
+              }`}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
+
         {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-slate-600">
-            {filteredPoems.length} {filteredPoems.length === 1 ? 'poem' : 'poems'} found
-          </p>
+        <div className="mb-8 animate-on-scroll">
+          <div className="flex items-center space-x-2 text-slate-600">
+            <TrendingUp className="h-5 w-5" />
+            <p className="font-medium">
+              {filteredPoems.length} {filteredPoems.length === 1 ? 'poem' : 'poems'} found
+            </p>
+          </div>
         </div>
 
         {/* Poems Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {filteredPoems.map((poem) => (
-            <div key={poem.id} className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow duration-300">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full font-medium">
-                      {poem.category}
-                    </span>
-                    {poem.featured && (
-                      <span className="inline-block bg-gold-100 text-gold-800 text-xs px-2 py-1 rounded-full font-medium">
-                        Featured
+          {filteredPoems.map((poem, index) => (
+            <div 
+              key={poem.id} 
+              className={`card-gradient hover-lift group animate-on-scroll`}
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <div className="p-8">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className={`inline-block bg-gradient-to-r ${poem.gradient} text-white text-sm px-4 py-2 rounded-full font-semibold shadow-lg`}>
+                        {poem.category}
                       </span>
-                    )}
+                      {poem.featured && (
+                        <div className="flex items-center space-x-1 bg-gradient-to-r from-gold-400 to-orange-400 text-white text-sm px-3 py-2 rounded-full font-semibold shadow-lg">
+                          <Star className="h-3 w-3" />
+                          <span>Featured</span>
+                        </div>
+                      )}
+                    </div>
+                    <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2 group-hover:text-primary-600 transition-colors">
+                      {poem.title}
+                    </h2>
+                    <p className="text-slate-600 mb-4 font-medium">
+                      by {poem.author}
+                    </p>
                   </div>
-                  <h2 className="text-xl font-serif font-semibold text-slate-900 mb-1">
-                    {poem.title}
-                  </h2>
-                  <p className="text-sm text-slate-600 mb-3">
-                    by {poem.author}
+                </div>
+
+                {/* Excerpt */}
+                <div className="mb-6">
+                  <p className="text-slate-700 italic leading-relaxed text-lg">
+                    "{poem.excerpt}"
                   </p>
                 </div>
-              </div>
 
-              {/* Excerpt */}
-              <div className="mb-4">
-                <p className="text-slate-700 italic leading-relaxed">
-                  "{poem.excerpt}"
-                </p>
-              </div>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                {poem.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center text-xs text-slate-600 bg-slate-100 rounded-full px-2 py-1"
-                  >
-                    <Tag className="h-3 w-3 mr-1" />
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* Stats */}
-              <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
-                <div className="flex items-center space-x-4">
-                  <span className="flex items-center">
-                    <Heart className="h-4 w-4 mr-1" />
-                    {poem.likes}
-                  </span>
-                  <span className="flex items-center">
-                    <Eye className="h-4 w-4 mr-1" />
-                    {poem.views}
-                  </span>
-                  <span className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    {formatDate(poem.created_at)}
-                  </span>
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {poem.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center text-sm text-slate-600 bg-slate-100 rounded-full px-3 py-1 hover:bg-slate-200 transition-colors"
+                    >
+                      <Tag className="h-3 w-3 mr-1" />
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-              </div>
 
-              {/* Action Button */}
-              <Link
-                to={`/poems/${poem.id}`}
-                className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
-              >
-                Read Full Poem
-                <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
+                {/* Stats */}
+                <div className="flex items-center justify-between text-sm text-slate-500 mb-6">
+                  <div className="flex items-center space-x-6">
+                    <span className="flex items-center space-x-1 hover:text-red-500 transition-colors">
+                      <Heart className="h-4 w-4" />
+                      <span className="font-medium">{poem.likes}</span>
+                    </span>
+                    <span className="flex items-center space-x-1 hover:text-blue-500 transition-colors">
+                      <Eye className="h-4 w-4" />
+                      <span className="font-medium">{poem.views}</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <Calendar className="h-4 w-4" />
+                      <span>{formatDate(poem.created_at)}</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <Link
+                  to={`/poems/${poem.id}`}
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span>Read Full Poem</span>
+                  <Sparkles className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           ))}
         </div>
 
         {/* Empty State */}
         {filteredPoems.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-slate-400 mb-4">
-              <Search className="h-12 w-12 mx-auto" />
+          <div className="text-center py-16 animate-on-scroll">
+            <div className="card-gradient p-12 max-w-md mx-auto">
+              <Search className="h-16 w-16 text-slate-400 mx-auto mb-6" />
+              <h3 className="text-2xl font-bold text-slate-900 mb-4">No poems found</h3>
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                Try adjusting your search terms or category filter to discover more poetry.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCategory('all');
+                }}
+                className="btn-primary"
+              >
+                Clear all filters
+              </button>
             </div>
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No poems found</h3>
-            <p className="text-slate-600 mb-4">
-              Try adjusting your search terms or category filter.
-            </p>
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('all');
-              }}
-              className="text-primary-600 hover:text-primary-700 font-medium"
-            >
-              Clear all filters
-            </button>
           </div>
         )}
 
-        {/* Load More Button (for pagination) */}
+        {/* Load More Button */}
         {filteredPoems.length > 0 && (
-          <div className="text-center mt-12">
-            <button className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200">
-              Load More Poems
+          <div className="text-center mt-16 animate-on-scroll">
+            <button className="btn-accent inline-flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5" />
+              <span>Load More Poems</span>
             </button>
           </div>
         )}
