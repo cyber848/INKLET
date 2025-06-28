@@ -20,7 +20,12 @@ import {
   Heart,
   TrendingUp,
   Save,
-  X
+  X,
+  CheckCircle,
+  XCircle,
+  Clock,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -33,6 +38,8 @@ interface AdminStats {
   publishedBlogPosts: number;
   featuredPoems: number;
   featuredBlogPosts: number;
+  pendingSubmissions: number;
+  totalSubmissions: number;
 }
 
 interface ContentItem {
@@ -46,6 +53,26 @@ interface ContentItem {
   views_count: number;
   created_at: string;
   user_id: string;
+}
+
+interface Submission {
+  id: string;
+  type: 'poem' | 'blog_post';
+  title: string;
+  content: string;
+  excerpt: string;
+  author_name: string;
+  author_bio: string;
+  category?: { name: string };
+  tags: string[];
+  reading_time?: number;
+  status: 'pending' | 'approved' | 'rejected';
+  admin_notes?: string;
+  user_id: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  created_at: string;
+  user?: { email: string; full_name?: string };
 }
 
 interface User {
@@ -91,18 +118,20 @@ interface BlogPostFormData {
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'poems' | 'blog' | 'users' | 'categories'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'submissions' | 'poems' | 'blog' | 'users' | 'categories'>('dashboard');
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [poems, setPoems] = useState<ContentItem[]>([]);
   const [blogPosts, setBlogPosts] = useState<ContentItem[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft' | 'pending' | 'approved' | 'rejected'>('all');
   const [showCreatePoem, setShowCreatePoem] = useState(false);
   const [showCreateBlogPost, setShowCreateBlogPost] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [reviewingSubmission, setReviewingSubmission] = useState<string | null>(null);
 
   const poemForm = useForm<PoemFormData>();
   const blogPostForm = useForm<BlogPostFormData>();
@@ -130,6 +159,7 @@ const Admin: React.FC = () => {
         loadStats(),
         loadPoems(),
         loadBlogPosts(),
+        loadSubmissions(),
         loadUsers(),
         loadCategories()
       ]);
@@ -142,17 +172,19 @@ const Admin: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const [poemsResult, blogPostsResult, usersResult, categoriesResult] = await Promise.all([
+      const [poemsResult, blogPostsResult, usersResult, categoriesResult, submissionsResult] = await Promise.all([
         supabase.from('poems').select('published, featured'),
         supabase.from('blog_posts').select('published, featured'),
         supabase.from('profiles').select('id'),
-        supabase.from('categories').select('id')
+        supabase.from('categories').select('id'),
+        supabase.from('submissions').select('status')
       ]);
 
       const poems = poemsResult.data || [];
       const blogPosts = blogPostsResult.data || [];
       const users = usersResult.data || [];
       const categories = categoriesResult.data || [];
+      const submissions = submissionsResult.data || [];
 
       setStats({
         totalPoems: poems.length,
@@ -163,9 +195,29 @@ const Admin: React.FC = () => {
         publishedBlogPosts: blogPosts.filter(p => p.published).length,
         featuredPoems: poems.filter(p => p.featured).length,
         featuredBlogPosts: blogPosts.filter(p => p.featured).length,
+        pendingSubmissions: submissions.filter(s => s.status === 'pending').length,
+        totalSubmissions: submissions.length,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
+    }
+  };
+
+  const loadSubmissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('submissions')
+        .select(`
+          *,
+          categories (name),
+          profiles!submissions_user_id_fkey (email, full_name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSubmissions(data || []);
+    } catch (error) {
+      console.error('Error loading submissions:', error);
     }
   };
 
@@ -244,6 +296,58 @@ const Admin: React.FC = () => {
       setCategories(data || []);
     } catch (error) {
       console.error('Error loading categories:', error);
+    }
+  };
+
+  const reviewSubmission = async (submissionId: string, action: 'approve' | 'reject', adminNotes?: string) => {
+    setReviewingSubmission(submissionId);
+    try {
+      const submission = submissions.find(s => s.id === submissionId);
+      if (!submission) throw new Error('Submission not found');
+
+      if (action === 'approve') {
+        // Create the content in the appropriate table
+        const contentData = {
+          title: submission.title,
+          content: submission.content,
+          excerpt: submission.excerpt,
+          author_name: submission.author_name,
+          author_bio: submission.author_bio,
+          category_id: submission.category?.name ? 
+            categories.find(c => c.name === submission.category?.name)?.id : null,
+          tags: submission.tags,
+          reading_time: submission.reading_time,
+          published: true,
+          featured: false,
+          user_id: submission.user_id
+        };
+
+        const tableName = submission.type === 'poem' ? 'poems' : 'blog_posts';
+        const { error: contentError } = await supabase
+          .from(tableName)
+          .insert(contentData);
+
+        if (contentError) throw contentError;
+      }
+
+      // Update submission status
+      const { error } = await supabase
+        .from('submissions')
+        .update({
+          status: action === 'approve' ? 'approved' : 'rejected',
+          admin_notes: adminNotes,
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', submissionId);
+
+      if (error) throw error;
+
+      await Promise.all([loadSubmissions(), loadStats(), loadPoems(), loadBlogPosts()]);
+    } catch (error) {
+      console.error('Error reviewing submission:', error);
+    } finally {
+      setReviewingSubmission(null);
     }
   };
 
@@ -381,6 +485,26 @@ const Admin: React.FC = () => {
     }
   };
 
+  const deleteSubmission = async (submissionId: string) => {
+    if (!confirm('Are you sure you want to delete this submission? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('submissions')
+        .delete()
+        .eq('id', submissionId);
+
+      if (error) throw error;
+
+      setSubmissions(submissions.filter(s => s.id !== submissionId));
+      await loadStats();
+    } catch (error) {
+      console.error('Error deleting submission:', error);
+    }
+  };
+
   const toggleUserAdmin = async (userId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
@@ -459,6 +583,17 @@ const Admin: React.FC = () => {
       const matchesFilter = filterStatus === 'all' || 
                            (filterStatus === 'published' && item.published) ||
                            (filterStatus === 'draft' && !item.published);
+      
+      return matchesSearch && matchesFilter;
+    });
+  };
+
+  const filterSubmissions = (submissions: Submission[]) => {
+    return submissions.filter(submission => {
+      const matchesSearch = submission.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           submission.author_name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesFilter = filterStatus === 'all' || submission.status === filterStatus;
       
       return matchesSearch && matchesFilter;
     });
@@ -622,11 +757,12 @@ const Admin: React.FC = () => {
           <nav className="-mb-px flex space-x-8">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: TrendingUp },
+              { id: 'submissions', label: 'Submissions', icon: Send, count: stats?.pendingSubmissions },
               { id: 'poems', label: 'Poems', icon: BookOpen },
               { id: 'blog', label: 'Blog Posts', icon: FileText },
               { id: 'users', label: 'Users', icon: Users },
               { id: 'categories', label: 'Categories', icon: Tag },
-            ].map(({ id, label, icon: Icon }) => (
+            ].map(({ id, label, icon: Icon, count }) => (
               <button
                 key={id}
                 onClick={() => setActiveTab(id as any)}
@@ -638,6 +774,11 @@ const Admin: React.FC = () => {
               >
                 <Icon className="h-4 w-4 mr-2" />
                 {label}
+                {count !== undefined && count > 0 && (
+                  <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
+                    {count}
+                  </span>
+                )}
               </button>
             ))}
           </nav>
@@ -675,16 +816,16 @@ const Admin: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatCard
-                title="Published Poems"
-                value={stats.publishedPoems}
-                icon={<Eye className="h-6 w-6 text-white" />}
-                color="bg-blue-600"
+                title="Pending Submissions"
+                value={stats.pendingSubmissions}
+                icon={<Clock className="h-6 w-6 text-white" />}
+                color="bg-yellow-500"
               />
               <StatCard
-                title="Published Blog Posts"
-                value={stats.publishedBlogPosts}
-                icon={<Eye className="h-6 w-6 text-white" />}
-                color="bg-green-600"
+                title="Total Submissions"
+                value={stats.totalSubmissions}
+                icon={<Send className="h-6 w-6 text-white" />}
+                color="bg-indigo-500"
               />
               <StatCard
                 title="Featured Poems"
@@ -698,6 +839,143 @@ const Admin: React.FC = () => {
                 icon={<Star className="h-6 w-6 text-white" />}
                 color="bg-gold-600"
               />
+            </div>
+          </div>
+        )}
+
+        {/* Submissions Tab */}
+        {activeTab === 'submissions' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search submissions..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Title & Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Author
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Submitted
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-200">
+                    {filterSubmissions(submissions).map((submission) => (
+                      <tr key={submission.id} className="hover:bg-slate-50">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            {submission.type === 'poem' ? (
+                              <BookOpen className="h-5 w-5 text-blue-600 mr-3" />
+                            ) : (
+                              <FileText className="h-5 w-5 text-green-600 mr-3" />
+                            )}
+                            <div>
+                              <div className="text-sm font-medium text-slate-900">{submission.title}</div>
+                              <div className="text-sm text-slate-500 capitalize">{submission.type.replace('_', ' ')}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-slate-900">{submission.author_name}</div>
+                          <div className="text-sm text-slate-500">{submission.user?.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            submission.status === 'pending' 
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : submission.status === 'approved'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          {formatDistanceToNow(new Date(submission.created_at), { addSuffix: true })}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center space-x-2">
+                            {submission.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => reviewSubmission(submission.id, 'approve')}
+                                  disabled={reviewingSubmission === submission.id}
+                                  className="text-green-600 hover:text-green-800 disabled:opacity-50"
+                                  title="Approve"
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const notes = prompt('Rejection reason (optional):');
+                                    reviewSubmission(submission.id, 'reject', notes || undefined);
+                                  }}
+                                  disabled={reviewingSubmission === submission.id}
+                                  className="text-red-600 hover:text-red-800 disabled:opacity-50"
+                                  title="Reject"
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => {
+                                const content = `Title: ${submission.title}\n\nContent:\n${submission.content}\n\nExcerpt:\n${submission.excerpt || 'N/A'}`;
+                                alert(content);
+                              }}
+                              className="text-blue-600 hover:text-blue-800"
+                              title="View Content"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteSubmission(submission.id)}
+                              className="text-red-600 hover:text-red-800"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

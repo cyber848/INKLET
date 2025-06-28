@@ -113,6 +113,7 @@ const Submit: React.FC = () => {
       setSubmitted(true);
       reset();
     } catch (error: any) {
+      console.error('Submission error:', error);
       setError(error.message || 'Failed to submit. Please try again.');
     } finally {
       setSubmitting(false);
