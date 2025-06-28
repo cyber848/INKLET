@@ -80,7 +80,7 @@ const Home: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen overflow-hidden">
+    <div className="min-h-screen overflow-hidden paper-bg">
       {/* Floating Background Shapes */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="floating-shape floating-shape-1"></div>
@@ -90,7 +90,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden parchment">
         {/* Animated Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary-500 via-secondary-500 to-accent-500 animate-gradient"></div>
         <div className="absolute inset-0 bg-floating-shapes opacity-30"></div>
@@ -115,7 +115,7 @@ const Home: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link
               to="/poems"
-              className="group bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-2"
+              className="group bg-white text-primary-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-2 paper-fold"
             >
               <BookOpen className="h-6 w-6 group-hover:animate-bounce" />
               <span>Explore Poems</span>
@@ -140,10 +140,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Poems */}
-      <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50 relative">
+      <section className="py-20 paper-section relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-on-scroll">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary-100 to-secondary-100 px-6 py-3 rounded-full mb-6">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary-100 to-secondary-100 px-6 py-3 rounded-full mb-6 paper-fold">
               <Star className="h-5 w-5 text-primary-600" />
               <span className="text-primary-700 font-semibold">Featured Collection</span>
             </div>
@@ -159,10 +159,10 @@ const Home: React.FC = () => {
             {featuredPoems.map((poem, index) => (
               <div 
                 key={poem.id} 
-                className={`card-gradient hover-lift group animate-on-scroll`}
+                className={`card hover-lift group animate-on-scroll manuscript-lines ink-stain`}
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                <div className="p-8">
+                <div className="p-8 relative z-10">
                   <div className="mb-6">
                     <div className={`inline-block bg-gradient-to-r ${poem.gradient} text-white text-sm px-4 py-2 rounded-full font-semibold shadow-lg`}>
                       {poem.category}
@@ -208,7 +208,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600 relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600 relative overflow-hidden aged-paper">
         <div className="absolute inset-0 bg-floating-shapes opacity-20"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16 animate-on-scroll">
@@ -226,7 +226,7 @@ const Home: React.FC = () => {
               return (
                 <div 
                   key={index}
-                  className={`text-center animate-on-scroll hover-lift`}
+                  className={`text-center animate-on-scroll hover-lift paper-fold`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${stat.color} rounded-2xl mb-6 shadow-2xl`}>
@@ -242,10 +242,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Blog Posts */}
-      <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50 relative">
+      <section className="py-20 parchment relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-on-scroll">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-100 to-pink-100 px-6 py-3 rounded-full mb-6">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-100 to-pink-100 px-6 py-3 rounded-full mb-6 vintage-edge">
               <TrendingUp className="h-5 w-5 text-purple-600" />
               <span className="text-purple-700 font-semibold">Latest Insights</span>
             </div>
@@ -261,10 +261,10 @@ const Home: React.FC = () => {
             {featuredBlogPosts.map((post, index) => (
               <div 
                 key={post.id} 
-                className={`card-gradient hover-lift group animate-on-scroll`}
+                className={`card hover-lift group animate-on-scroll vintage-edge`}
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                <div className="p-8">
+                <div className="p-8 relative z-10">
                   <div className={`inline-block bg-gradient-to-r ${post.gradient} text-white text-sm px-4 py-2 rounded-full font-semibold shadow-lg mb-6`}>
                     {post.readTime}
                   </div>
@@ -308,7 +308,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden aged-paper">
         <div className="absolute inset-0 bg-floating-shapes opacity-10"></div>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="animate-on-scroll">
@@ -331,7 +331,7 @@ const Home: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link
                 to="/auth?mode=signup"
-                className="group bg-gradient-to-r from-gold-400 to-orange-400 hover:from-gold-500 hover:to-orange-500 text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3"
+                className="group bg-gradient-to-r from-gold-400 to-orange-400 hover:from-gold-500 hover:to-orange-500 text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 paper-fold"
               >
                 <Zap className="h-6 w-6 group-hover:animate-bounce" />
                 <span>Join Today</span>

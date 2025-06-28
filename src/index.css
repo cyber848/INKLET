@@ -8,7 +8,7 @@
   }
   
   body {
-    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50;
+    @apply bg-paper-texture;
   }
 }
 
@@ -30,15 +30,35 @@
   }
   
   .card {
-    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 border border-white/20;
+    @apply bg-paper-card backdrop-blur-sm rounded-2xl shadow-paper hover:shadow-paper-hover transition-all duration-300 border border-paper-edge relative;
+  }
+  
+  .card::before {
+    content: '';
+    @apply absolute inset-0 bg-paper-texture opacity-30 rounded-2xl pointer-events-none;
   }
   
   .card-gradient {
-    @apply bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-md rounded-2xl shadow-card-glow hover:shadow-card-hover transition-all duration-300 border border-white/30;
+    @apply bg-paper-gradient backdrop-blur-md rounded-2xl shadow-paper-glow hover:shadow-paper-hover transition-all duration-300 border border-paper-edge-light relative overflow-hidden;
+  }
+  
+  .card-gradient::before {
+    content: '';
+    @apply absolute inset-0 bg-paper-grain opacity-20 pointer-events-none;
+  }
+  
+  .card-gradient::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent pointer-events-none;
   }
   
   .glass {
-    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl;
+    @apply bg-paper-glass backdrop-blur-md border border-paper-edge rounded-2xl relative;
+  }
+  
+  .glass::before {
+    content: '';
+    @apply absolute inset-0 bg-paper-texture opacity-20 rounded-2xl pointer-events-none;
   }
   
   .text-gradient {
@@ -77,6 +97,54 @@
     @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer;
     content: '';
   }
+
+  .paper-bg {
+    @apply bg-paper-texture relative;
+  }
+
+  .paper-bg::before {
+    content: '';
+    @apply absolute inset-0 bg-paper-grain opacity-30 pointer-events-none;
+  }
+
+  .paper-section {
+    @apply bg-paper-section relative;
+  }
+
+  .paper-section::before {
+    content: '';
+    @apply absolute inset-0 bg-paper-texture opacity-40 pointer-events-none;
+  }
+
+  .paper-section::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none;
+  }
+
+  .manuscript-lines {
+    background-image: 
+      linear-gradient(to bottom, transparent 0px, transparent 23px, rgba(59, 130, 246, 0.1) 24px, rgba(59, 130, 246, 0.1) 25px, transparent 26px),
+      linear-gradient(to right, rgba(220, 38, 127, 0.1) 0px, rgba(220, 38, 127, 0.1) 1px, transparent 2px);
+    background-size: 100% 25px, 25px 100%;
+  }
+
+  .parchment {
+    @apply bg-parchment relative;
+  }
+
+  .parchment::before {
+    content: '';
+    @apply absolute inset-0 bg-parchment-texture opacity-60 pointer-events-none;
+  }
+
+  .aged-paper {
+    @apply bg-aged-paper relative;
+  }
+
+  .aged-paper::before {
+    content: '';
+    @apply absolute inset-0 bg-aged-texture opacity-40 pointer-events-none;
+  }
 }
 
 @layer utilities {
@@ -110,7 +178,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-slate-100;
+  @apply bg-paper-texture;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -154,4 +222,50 @@
 .gradient-text-animated {
   @apply bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600 bg-clip-text text-transparent animate-gradient;
   background-size: 200% auto;
+}
+
+/* Paper fold effect */
+.paper-fold {
+  position: relative;
+}
+
+.paper-fold::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(-45deg, transparent 46%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 54%, transparent 58%);
+  border-radius: 0 0 0 20px;
+}
+
+/* Ink stain effects */
+.ink-stain {
+  position: relative;
+}
+
+.ink-stain::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  top: 10%;
+  right: 15%;
+}
+
+/* Vintage paper edge */
+.vintage-edge {
+  position: relative;
+}
+
+.vintage-edge::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, rgba(139, 69, 19, 0.1), transparent);
+  border-radius: inherit;
+  z-index: -1;
 }

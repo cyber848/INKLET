@@ -185,7 +185,7 @@ of acceptance.`,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen paper-bg">
       {/* Floating Background Shapes */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="floating-shape floating-shape-1"></div>
@@ -195,7 +195,7 @@ of acceptance.`,
       </div>
 
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600 overflow-hidden parchment">
         <div className="absolute inset-0 bg-floating-shapes opacity-20"></div>
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="text-center">
@@ -215,7 +215,7 @@ of acceptance.`,
 
       {/* Search and Filter */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        <div className={`card-gradient p-6 mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+        <div className={`card p-6 mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Search */}
             <div className="flex-1 relative">
@@ -253,7 +253,7 @@ of acceptance.`,
             <button
               key={category.value}
               onClick={() => setSelectedCategory(category.value)}
-              className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 ${
+              className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 paper-fold ${
                 selectedCategory === category.value
                   ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
                   : 'bg-white/80 text-slate-600 hover:bg-white border border-slate-200'
@@ -279,10 +279,10 @@ of acceptance.`,
           {filteredPoems.map((poem, index) => (
             <div 
               key={poem.id} 
-              className={`card-gradient hover-lift group animate-on-scroll`}
+              className={`card hover-lift group animate-on-scroll manuscript-lines ink-stain`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="p-8">
+              <div className="p-8 relative z-10">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex-1">
@@ -347,7 +347,7 @@ of acceptance.`,
                 {/* Action Button */}
                 <Link
                   to={`/poems/${poem.id}`}
-                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl paper-fold"
                 >
                   <BookOpen className="h-4 w-4" />
                   <span>Read Full Poem</span>
@@ -361,7 +361,7 @@ of acceptance.`,
         {/* Empty State */}
         {filteredPoems.length === 0 && (
           <div className="text-center py-16 animate-on-scroll">
-            <div className="card-gradient p-12 max-w-md mx-auto">
+            <div className="card p-12 max-w-md mx-auto">
               <Search className="h-16 w-16 text-slate-400 mx-auto mb-6" />
               <h3 className="text-2xl font-bold text-slate-900 mb-4">No poems found</h3>
               <p className="text-slate-600 mb-6 leading-relaxed">

@@ -103,6 +103,43 @@ export default {
           700: '#334155',
           800: '#1e293b',
           900: '#0f172a',
+        },
+        // Paper-like colors
+        paper: {
+          50: '#fefefe',
+          100: '#fdfdfd',
+          200: '#fbfbfb',
+          300: '#f8f8f8',
+          400: '#f5f5f5',
+          500: '#f2f2f2',
+          600: '#efefef',
+          700: '#ececec',
+          800: '#e9e9e9',
+          900: '#e6e6e6',
+        },
+        parchment: {
+          50: '#fefcf7',
+          100: '#fdf9ef',
+          200: '#fbf3df',
+          300: '#f9edcf',
+          400: '#f7e7bf',
+          500: '#f5e1af',
+          600: '#f3db9f',
+          700: '#f1d58f',
+          800: '#efcf7f',
+          900: '#edc96f',
+        },
+        aged: {
+          50: '#faf8f3',
+          100: '#f5f1e7',
+          200: '#ebe3cf',
+          300: '#e1d5b7',
+          400: '#d7c79f',
+          500: '#cdb987',
+          600: '#c3ab6f',
+          700: '#b99d57',
+          800: '#af8f3f',
+          900: '#a58127',
         }
       },
       backgroundImage: {
@@ -119,6 +156,17 @@ export default {
         'card-gradient-6': 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
         'mesh-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
         'floating-shapes': 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3Ccircle cx="10" cy="10" r="2"/%3E%3Ccircle cx="50" cy="50" r="3"/%3E%3Ccircle cx="10" cy="50" r="2"/%3E%3Ccircle cx="50" cy="10" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+        // Paper textures
+        'paper-texture': 'url("data:image/svg+xml,%3Csvg width="100" height="100" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cfilter id="paper"%3E%3CfeTurbulence baseFrequency="0.04" numOctaves="5" result="noise" seed="1"/%3E%3CfeColorMatrix in="noise" type="saturate" values="0"/%3E%3CfeComponentTransfer%3E%3CfeFuncA type="discrete" tableValues="0.88 0.90 0.92 0.94 0.96 0.98 1.00"/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%25" height="100%25" filter="url(%23paper)" fill="%23fefefe"/%3E%3C/svg%3E")',
+        'paper-grain': 'url("data:image/svg+xml,%3Csvg width="200" height="200" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cfilter id="grain"%3E%3CfeTurbulence baseFrequency="0.9" numOctaves="4" result="noise" seed="2"/%3E%3CfeColorMatrix in="noise" type="saturate" values="0"/%3E%3CfeComponentTransfer%3E%3CfeFuncA type="discrete" tableValues="0.1 0.2 0.3 0.4 0.5"/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%25" height="100%25" filter="url(%23grain)" fill="%23f8f8f8"/%3E%3C/svg%3E")',
+        'paper-card': 'linear-gradient(145deg, #fefefe 0%, #f8f8f8 100%)',
+        'paper-gradient': 'linear-gradient(145deg, #fefefe 0%, #f5f5f5 50%, #f0f0f0 100%)',
+        'paper-glass': 'linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(248,248,248,0.8) 100%)',
+        'paper-section': 'linear-gradient(180deg, #fefefe 0%, #f8f8f8 50%, #f5f5f5 100%)',
+        'parchment': 'linear-gradient(145deg, #fefcf7 0%, #f5f1e7 50%, #ebe3cf 100%)',
+        'parchment-texture': 'url("data:image/svg+xml,%3Csvg width="100" height="100" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cfilter id="parchment"%3E%3CfeTurbulence baseFrequency="0.02" numOctaves="3" result="noise" seed="3"/%3E%3CfeColorMatrix in="noise" type="saturate" values="0"/%3E%3CfeComponentTransfer%3E%3CfeFuncA type="discrete" tableValues="0.7 0.8 0.9 1.0"/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%25" height="100%25" filter="url(%23parchment)" fill="%23f5f1e7"/%3E%3C/svg%3E")',
+        'aged-paper': 'linear-gradient(145deg, #faf8f3 0%, #f5f1e7 50%, #ebe3cf 100%)',
+        'aged-texture': 'url("data:image/svg+xml,%3Csvg width="150" height="150" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cfilter id="aged"%3E%3CfeTurbulence baseFrequency="0.03" numOctaves="4" result="noise" seed="4"/%3E%3CfeColorMatrix in="noise" type="saturate" values="0"/%3E%3CfeComponentTransfer%3E%3CfeFuncA type="discrete" tableValues="0.6 0.7 0.8 0.9"/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%25" height="100%25" filter="url(%23aged)" fill="%23f5f1e7"/%3E%3C/svg%3E")',
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',
@@ -134,6 +182,7 @@ export default {
         'scale-in': 'scaleIn 0.4s ease-out',
         'rotate-slow': 'rotate 20s linear infinite',
         'shimmer': 'shimmer 2s linear infinite',
+        'paper-flutter': 'paperFlutter 4s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -174,6 +223,12 @@ export default {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(100%)' },
         },
+        paperFlutter: {
+          '0%, 100%': { transform: 'rotateX(0deg) rotateY(0deg)' },
+          '25%': { transform: 'rotateX(1deg) rotateY(1deg)' },
+          '50%': { transform: 'rotateX(0deg) rotateY(2deg)' },
+          '75%': { transform: 'rotateX(-1deg) rotateY(1deg)' },
+        },
       },
       boxShadow: {
         'glow': '0 0 20px rgba(59, 130, 246, 0.5)',
@@ -185,6 +240,17 @@ export default {
         'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         'card-glow': '0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        // Paper shadows
+        'paper': '0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+        'paper-hover': '0 8px 25px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+        'paper-glow': '0 0 0 1px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06)',
+        'paper-edge': 'inset 0 0 0 1px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1)',
+        'paper-fold': '0 2px 8px rgba(0, 0, 0, 0.1), inset -2px -2px 4px rgba(0, 0, 0, 0.05)',
+      },
+      borderColor: {
+        'paper-edge': 'rgba(0, 0, 0, 0.08)',
+        'paper-edge-light': 'rgba(0, 0, 0, 0.05)',
+        'paper-fold': 'rgba(0, 0, 0, 0.1)',
       },
       backdropBlur: {
         xs: '2px',
